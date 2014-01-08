@@ -1,9 +1,5 @@
 ﻿<?php
 namespace Ux;
-
-date_default_timezone_set('Asia/Tehran');
-
-require_once 'VaText.php';
 /**
  * Return the value from an associative array or an object.
  * Taked from Garden core (for use this functions in other projects).
@@ -14,42 +10,31 @@ require_once 'VaText.php';
  * @param mixed $default The value to return if the key does not exist.
  * @param bool $remove Whether or not to remove the item from the collection.
  * @return mixed $result The value from the array or object.
- * /
+ */
 function getValue($key, &$collection, $default = false, $remove = false)
 {
-$result = $default;
-if (is_array($collection) && array_key_exists($key, $collection)) {
-$result = $collection[$key];
-if ($remove) unset($collection[$key]);
-} elseif (is_object($collection) && property_exists($collection, $key)) {
-$result = $collection->$key;
-if ($remove) unset($collection->$key);
-}
-return $result;
+    $result = $default;
+    if (is_array($collection) && array_key_exists($key, $collection)) {
+        $result = $collection[$key];
+        if ($remove) unset($collection[$key]);
+    } elseif (is_object($collection) && property_exists($collection, $key)) {
+        $result = $collection->$key;
+        if ($remove) unset($collection->$key);
+    }
+    return $result;
 }
 
 function println($string)
 {
-echo $string . PHP_EOL;
+    echo $string . PHP_EOL;
 }
 
 
 /***
- * @link http://stackoverflow.com/questions/14995307/sending-var-dump-to-firebug-console/15315520?noredirect=1#comment21631578_15315520
+ * similar to js console.log method:
  */
 function log($var, $name = '', $now = false)
 {
-
-//    if ($var === null)          $type = 'NULL';
-//    else if (is_bool($var))     $type = 'BOOL';
-//    else if (is_string($var))   $type = 'STRING[' . strlen($var) . ']';
-//    else if (is_int($var))      $type = 'INT';
-//    else if (is_float($var))    $type = 'FLOAT';
-//    else if (is_array($var))    $type = 'ARRAY[' . count($var) . ']';
-//    else if (is_object($var))   $type = 'OBJECT';
-//    else if (is_resource($var)) $type = 'RESOURCE';
-//    else                        $type = '???';
-
     $type = gettype($var);
     if (is_string($var)) $type .= '(' . strlen($var) . ')';
     if (is_array($var)) $type = '(' . count($var) . ')';
@@ -215,48 +200,12 @@ function toArabic($roman)
     return $result;
 }
 
-namespace Ux\Ref;
-function nullDoc()
-{
-    $quirks = array(' null' => null, ' true' => true, 'false' => false, '    0' => 0, '    1' => 1, '   \0' => "\0", 'unset' => $unset, '  "" ' => '', '  [] ' => []);
-
-    echo '        isset  is_null ===null  ==null  empty' . PHP_EOL;
-    foreach ($quirks as $k => $var) {
-
-        echo $k . ' ';
-        echo isset($var) ? '|   T   ' : '|   F   ';
-        echo is_null($var) ? '|   T   ' : '|   F   ';
-        echo (null === $var) ? '|   T   ' : '|   F   ';
-        echo (null == $var) ? '|   T   ' : '|   F   ';
-        echo (empty($var)) ? '|   T   ' : '|   F   ';
-        echo '|' . PHP_EOL;
-    }
-}
 
 namespace Ux\Str;
 
-function normalize($string, $lang = 'fa')
+function zwjRemover($string)
 {
-    if ($lang == 'fa') {
-        $string = persinafy($string);
-        $string = preg_replace(['@ي@u', '@ك@u', '#,#u', '#;#u', '#%#u', '#ـ+#u',], ['ی', 'ک', '،', '؛', '٪', ''], $string);
-        $string = preg_replace('#(["\'`]+)(.+?)(\1)#u', '«\2»', $string);
-        $string = preg_replace('#[ ‌  ]*([:;,؛،.؟!]{1})[ ‌  ]*#u', '\1 ', $string);
-        $string = preg_replace('#([۰-۹]+):\s+([۰-۹]+)#u', '\1:\2', $string);
-    }
-//    $string = preg_replace('#\s*(\[)\s*([^)]+?)\s*?(\])\s*#u', ' \1\2\3 ', $string);
-//    $string = preg_replace('#\s*(\{)\s*([^)]+?)\s*?(\})\s*#u', ' \1\2\3 ', $string);
-//    $string = preg_replace('#\s*(\()\s*([^)]+?)\s*?(\))\s*#u', ' \1\2\3 ', $string);
-//    $string = preg_replace('#\s*(«)\s*([^)]+?)\s*?(»)\s*#u', ' \1\2\3 ', $string);
-//    $string = preg_replace('#\s*(“)\s*([^)]+?)\s*?(”)\s*#u', ' \1\2\3 ', $string);
-    $string = preg_replace(['#\s*([\[\{\(«“])\s*#u', '#\s*([\]\}\)»”])\s*#u'], [' \1', '\1 '], $string);
-
-    return $string;
-}
-
-function persinafy($string, $lang = 'fa')
-{
-    $noMedialForm = 'ادذرزژوآأإءة';
+//    $noMedialForm = 'ادذرزژوآأإءة';
     $string = trim($string);
     $string = preg_replace('#(?<=[ادذرزژوآأإء])\x{200c}#u', '', $string);
     $string = preg_replace(['@ي@u', '@ك@u', '#,#u', '#;#u', '#%#u', '#ـ+#u',], ['ی', 'ک', '،', '؛', '٪', ''], $string);
@@ -266,13 +215,23 @@ function persinafy($string, $lang = 'fa')
     return $string;
 }
 
+function persianNormalize($string, $lang = 'fa')
+{
+    if ($lang == 'fa') {
+        $string = zwjRemover($string);
+        $string = preg_replace(['@ي@u', '@ك@u', '#,#u', '#;#u', '#%#u', '#ـ+#u',], ['ی', 'ک', '،', '؛', '٪', ''], $string);
+        $string = preg_replace('#(["\'`]+)(.+?)(\1)#u', '«\2»', $string);
+        $string = preg_replace('#[ ‌  ]*([:;,؛،.؟!]{1})[ ‌  ]*#u', '\1 ', $string);
+        $string = preg_replace('#([۰-۹]+):\s+([۰-۹]+)#u', '\1:\2', $string);
+    }
+
+    $string = preg_replace(['#\s*([\[\{\(«“])\s*#u', '#\s*([\]\}\)»”])\s*#u'], [' \1', '\1 '], $string);
+    return $string;
+}
 
 function fullTrim($string)
 {
     return tailTrim(headTrim($string));
-//    return mb_ereg_replace('.*','x',$string);
-//    return mb_ereg_replace('(?:^[^\pL]*)|(?:[^\pL]*$)','',$string);
-//    return preg_replace('#(?:^[^\pL]*)|(?:[^\pL]*$)#u','',$string);
 }
 
 function tailTrim($string)
@@ -284,7 +243,6 @@ function headTrim($string)
 {
     return preg_replace('#^[^\pN\pL]+#u', '', $string);
 }
-
 
 function random($length = 10)
 {
