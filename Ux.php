@@ -1,6 +1,5 @@
-<?php
+﻿<?php
 namespace Ux;
-use Phalcon\Cache\Backend\Mongo;
 
 date_default_timezone_set('Asia/Tehran');
 
